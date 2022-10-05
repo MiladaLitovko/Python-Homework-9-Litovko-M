@@ -10,7 +10,9 @@ del_buttons = telebot.types.ReplyKeyboardRemove()
  
 buttons1 = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 buttons1.row(telebot.types.KeyboardButton('экспорт данных'),
-             telebot.types.KeyboardButton('импорт данных'))
+             telebot.types.KeyboardButton('импорт данных'),
+             telebot.types.KeyboardButton('добавление записи'),
+             telebot.types.KeyboardButton('просмотр записей'))
 buttons1.row(telebot.types.KeyboardButton('Ещё не определился'))
 
 
@@ -39,6 +41,21 @@ def answer(msg: telebot.types.Message):
         bot.send_message(chat_id=msg.from_user.id,
                          text='Пришлите файл, который хотите импортировать в справочник.',
                          reply_markup=del_buttons)
+    elif msg.text == 'добавление записи':
+        bot.register_next_step_handler(msg, second_msg)
+        bot.send_message(chat_id=msg.from_user.id,
+                         text='Введите фамилию',
+                         reply_markup=del_buttons)
+    elif msg.text == 'просмотр записей':
+        bot.send_message(chat_id=msg.from_user.id,
+                         text='Высылаю все записи из справочника.',
+                         reply_markup=del_buttons)
+        new_list = ''
+        with open(script_dir + '/guide.txt', 'r', encoding="utf-8" ) as file:
+            for line in file:
+                new_list = new_list + line
+            file.close()
+        bot.send_message(chat_id=msg.from_user.id, text=new_list)
     elif msg.text == 'Ещё не определился':
         bot.register_next_step_handler(msg, answer)
         bot.send_message(chat_id=msg.from_user.id, text='Возвращайтесь, когда определитесь.')
@@ -47,6 +64,36 @@ def answer(msg: telebot.types.Message):
         bot.send_message(chat_id=msg.from_user.id, text='Пожалуйста, используйте кнопки.')
  
         bot.send_message(chat_id=msg.from_user.id, text='Введите действие, которое хотите совершить.', reply_markup=buttons1)
+
+def second_msg(msg: telebot.types.Message):
+    file = open(script_dir + '/guide.txt', 'a', encoding="utf-8")
+    file.write(msg.text + ', ')
+    file.close()
+    bot.register_next_step_handler(msg,third_msg)
+    bot.send_message(chat_id=msg.from_user.id, text='Введите имя.')
+
+
+def third_msg(msg: telebot.types.Message):
+    file = open(script_dir + '/guide.txt', 'a', encoding="utf-8")
+    file.write(msg.text + ', ')
+    file.close()
+    bot.register_next_step_handler(msg,fourth_msg)
+    bot.send_message(chat_id=msg.from_user.id, text='Введите номер телефона.')
+
+
+def fourth_msg(msg: telebot.types.Message):
+    file = open(script_dir + '/guide.txt', 'a', encoding="utf-8")
+    file.write(msg.text + ', ')
+    file.close()
+    bot.register_next_step_handler(msg,add_disciption)
+    bot.send_message(chat_id=msg.from_user.id, text='Введите описание.')
+
+
+def add_disciption(msg: telebot.types.Message):
+    file = open(script_dir + '/guide.txt', 'a', encoding="utf-8")
+    file.write(msg.text + '\n')
+    file.close()
+    bot.send_message(chat_id=msg.from_user.id, text='Добавили новый контакт в справочник.')
 
 
 def export_info(msg: telebot.types.Message):
@@ -70,7 +117,6 @@ def export_info(msg: telebot.types.Message):
     new_file.close()
     doc = open('Task3/export_file.txt', 'rb')
     bot.send_document(chat_id, doc)
-    # bot.send_document(chat_id, "FILEID")
 
 
 @bot.message_handler(content_types=['document'])
