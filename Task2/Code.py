@@ -2,10 +2,12 @@ from cmath import log
 from email.message import Message
 from fractions import Fraction
 import telebot
+import os
 
 first=""
 second=""
-history_for_bot = open('history_for_bot .txt','r+', encoding='utf-8')
+script_dir = os.path.dirname(__file__)
+history_for_bot = open(script_dir + '/history_for_bot .txt','r+', encoding='utf-8')
 
 bot = telebot.TeleBot('5460917203:AAFcw5YBaPs57Q9f6elHGP1HRVkjbaus1No')
 
